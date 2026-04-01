@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frade | Fila de Leads + Presença Premium</title>
+  <style>
+    :root {
+      --bg: #08101d;
+      --bg-2: #0d1728;
+      --panel: rgba(18, 30, 49, 0.86);
+      --panel-strong: rgba(22, 36, 60, 0.96);
+      --line: rgba(255,255,255,.08);
+      --line-strong: rgba(255,255,255,.14);
+      --text: #edf4ff;
+      --muted: #9db0d1;
+      --blue: #3f95ff;
+      --blue-2: #78bcff;
+      --green: #36cf8e;
+      --yellow: #ffc85a;
+      --red: #ff7474;
+      --shadow: 0 22px 48px rgba(0,0,0,.34);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(63,149,255,.22), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(120,188,255,.12), transparent 24%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+    }
+
+    button, input, select { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 430px 1fr;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+    }
+
+    .sidebar {
+      min-height: calc(100vh - 36px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .section {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section:last-child { border-bottom: 0; }
+    h1, h2, h3, p { margin: 0; }
+
+    .title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .title h1 { font-size: 24px; line-height: 1.08; }
+
+    .logo-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: white;
+      background: linear-gradient(180deg, #3f95ff, #216fea);
+      box-shadow: 0 12px 28px rgba(33,111,234,.35);
+      flex: 0 0 auto;
+    }
+
+    .title-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .subtitle, .small, .footer-note {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .subtitle { font-size: 14px; margin-top: 8px; }
+    .small, .footer-note { font-size: 12px; }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(63,149,255,.12);
+      color: var(--blue-2);
+      border: 1px solid rgba(120,188,255,.24);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .4px;
+      white-space: nowrap;
+    }
+
+    .grid-2, .summary-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .summary-grid { grid-template-columns: repeat(5, 1fr); gap: 12px; }
+
+    .input, .select {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      outline: none;
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+    }
+
+    .input::placeholder { color: #87a0ca; }
+
+    .input:focus, .select:focus {
+      border-color: rgba(63,149,255,.55);
+      box-shadow: 0 0 0 3px rgba(63,149,255,.18);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 800;
+      color: white;
+      transition: .16s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: linear-gradient(180deg, #3f95ff, #216fea); }
+    .btn-secondary { background: linear-gradient(180deg, #263650, #1a2438); border: 1px solid var(--line); }
+    .btn-success { background: linear-gradient(180deg, #31d893, #1baa6b); }
+    .btn-warning { background: linear-gradient(180deg, #ffd46d, #efb235); color: #1d1d1d; }
+    .btn-danger { background: linear-gradient(180deg, #ff8383, #e25151); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat, .summary-box, .queue-card, .summary-card, .ranking-card, .history-card, .now-card, .timer-card {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+    }
+
+    .stat {
+      padding: 14px;
+    }
+
+    .stat .label, .summary-box .label, .timer-label, .person-meta, .presence-col {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat .value, .summary-box .value {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .display {
+      min-height: calc(100vh - 36px);
+      display: grid;
+      grid-template-rows: auto auto auto auto 1fr;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 22px 24px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .kicker {
+      color: var(--blue-2);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .brand h2 { font-size: 28px; }
+
+    .clock {
+      text-align: right;
+    }
+
+    .clock .time {
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .clock .date {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+      text-transform: capitalize;
+    }
+
+    .hero {
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap: 18px;
+    }
+
+    .now-card, .timer-card {
+      padding: 24px;
+      min-height: 250px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .now-card::after {
+      content: '';
+      position: absolute;
+      inset: auto -50px -60px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(63,149,255,.16), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      color: var(--blue-2);
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+    }
+
+    .now-name {
+      font-size: clamp(40px, 5vw, 76px);
+      line-height: .94;
+      font-weight: 900;
+      margin: 16px 0 12px;
+      word-break: break-word;
+    }
+
+    .now-sub {
+      max-width: 90%;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .timer-card {
+      display: grid;
+      align-content: space-between;
+    }
+
+    .timer-value {
+      font-size: clamp(44px, 6vw, 78px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .progress-wrap { margin-top: 18px; }
+
+    .progress-bar {
+      height: 18px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,.07);
+      border: 1px solid var(--line);
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #3f95ff, #87c7ff);
+      transition: width .35s linear;
+    }
+
+    .timer-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .summary-card {
+      margin: 0 24px;
+      padding: 20px 24px;
+    }
+
+    .summary-head, .queue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .queue-title {
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .summary-box {
+      padding: 14px 16px;
+    }
+
+    .summary-box .value { font-size: 24px; }
+
+    .frade-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      color: var(--blue-2);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .4px;
+    }
+
+    .ranking-grid {
+      margin: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr .95fr;
+      gap: 18px;
+    }
+
+    .ranking-card, .history-card {
+      padding: 20px 24px;
+    }
+
+    .top3-list, .history-list, .queue-list, .presence-list, .table-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .top3-list, .history-list { max-height: 245px; }
+    .queue-list { max-height: 32vh; }
+    .presence-list { max-height: 260px; }
+    .table-list { max-height: 320px; }
+
+    .top3-item, .queue-item, .history-item, .presence-row, .mini-row {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+    }
+
+    .top3-item {
+      display: grid;
+      grid-template-columns: 60px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .medal {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      font-weight: 900;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+    }
+
+    .history-item {
+      padding: 12px 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .history-item strong { color: var(--text); }
+
+    .queue-card {
+      margin: 0 24px 24px;
+      padding: 24px;
+      min-height: 0;
+    }
+
+    .queue-item {
+      display: grid;
+      grid-template-columns: 64px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+    }
+
+    .queue-item.current {
+      border-color: rgba(120,188,255,.45);
+      background: rgba(63,149,255,.12);
+      box-shadow: inset 0 0 0 1px rgba(120,188,255,.12);
+    }
+
+    .queue-item.paused { opacity: .58; filter: grayscale(.15); }
+
+    .position {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 18px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+    }
+
+    .person-name, .presence-name, .mini-name {
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .person-name { font-size: 22px; line-height: 1.1; }
+    .presence-name { font-size: 15px; }
+    .mini-name { font-size: 15px; }
+
+    .right-tag {
+      color: var(--blue-2);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      text-align: right;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .mini-row.paused { opacity: .65; }
+
+    .mini-badge {
+      font-size: 11px;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      font-weight: 800;
+    }
+
+    .mini-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 9px 10px;
+      cursor: pointer;
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mini-btn.blue { background: #2d7df6; }
+    .mini-btn.gray { background: #263650; }
+    .mini-btn.red { background: #d65555; }
+
+    .presence-row {
+      display: grid;
+      grid-template-columns: 1.45fr .8fr .8fr .8fr;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+    }
+
+    .queue-empty, .empty {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .tv-mode .sidebar { display: none; }
+    .tv-mode .app { grid-template-columns: 1fr; }
+    .tv-mode .display { min-height: calc(100vh - 36px); }
+    .tv-mode .queue-list { max-height: 25vh; }
+    .tv-mode .ranking-grid { grid-template-columns: 1fr 1fr; }
+
+
+
+    .brand-logo-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(243,247,252,.94));
+      border: 1px solid rgba(255,255,255,.65);
+      box-shadow: 0 14px 34px rgba(0,0,0,.18);
+    }
+
+    .brand-logo-img {
+      display: block;
+      height: 56px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-logo-small {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(243,247,252,.92));
+      border: 1px solid rgba(255,255,255,.6);
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+    }
+
+    .brand-logo-small img {
+      display: block;
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .topbar {
+      position: relative;
+    }
+
+    .topbar::after {
+      content: '';
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(120,188,255,.28), rgba(255,255,255,0), rgba(120,188,255,.28));
+    }
+
+    .now-card {
+      background:
+        radial-gradient(circle at top right, rgba(63,149,255,.16), transparent 32%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    }
+
+    .timer-card {
+      background:
+        radial-gradient(circle at top left, rgba(120,188,255,.12), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    }
+
+    .summary-card, .ranking-card, .history-card, .queue-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.03));
+    }
+
+    .badge, .pill {
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    .person-name, .presence-name, .mini-name {
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .summary-box .label, .stat .label, .timer-label, .presence-col, .person-meta {
+      text-transform: uppercase;
+      letter-spacing: .55px;
+    }
+
+    .clock .time {
+      letter-spacing: 1px;
+    }
+
+    .footer-note {
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    @media (max-width: 760px) {
+      .brand-logo-card {
+        width: 100%;
+        justify-content: center;
+      }
+      .brand-logo-img {
+        height: 46px;
+      }
+    }
+
+    @media print {
+      .brand-logo-card, .brand-logo-small {
+        background: white !important;
+        box-shadow: none !important;
+        border-color: #d9d9d9 !important;
+      }
+    }
+
+    .tv-exit-btn {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 9999;
+      display: none;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(8,16,29,.88);
+      color: white;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      box-shadow: 0 16px 32px rgba(0,0,0,.28);
+    }
+
+    .tv-exit-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .tv-mode .tv-exit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tv-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+
+    @media (max-width: 1260px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar, .display { min-height: auto; }
+      .hero { grid-template-columns: 1fr; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .ranking-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .app { padding: 12px; gap: 12px; }
+      .topbar, .section, .queue-card, .summary-card, .ranking-card, .history-card { padding: 16px; }
+      .hero, .summary-card, .ranking-grid, .queue-card { margin-left: 0; margin-right: 0; }
+      .hero { padding: 0 16px; }
+      .summary-card, .ranking-grid, .queue-card { margin: 0 16px; }
+      .queue-item { grid-template-columns: 52px 1fr; }
+      .right-tag { grid-column: span 2; text-align: left; }
+      .mini-row, .presence-row, .summary-grid, .grid-2, .stats { grid-template-columns: 1fr; }
+      .top3-item { grid-template-columns: 52px 1fr; }
+    }
+
+    @media print {
+      body { background: white !important; color: black !important; }
+      .app { grid-template-columns: 1fr !important; padding: 0 !important; }
+      .sidebar { display: none !important; }
+      .panel, .now-card, .timer-card, .queue-card, .summary-card, .summary-box, .queue-item, .presence-row, .ranking-card, .history-card, .top3-item, .history-item {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+        border-color: #d9d9d9 !important;
+      }
+      .badge, .pill, .kicker, .right-tag, .person-meta, .presence-col, .clock .date, .timer-note, .timer-label, .subtitle, .small, .footer-note {
+        color: #444 !important;
+      }
+      .clock .time, .queue-title, .now-name, .summary-box .value, .person-name, .presence-name, .brand h2, .title h1, .history-item strong {
+        color: black !important;
+      }
+      .progress-bar { border-color: #ccc !important; background: #f3f3f3 !important; }
+      .progress-fill { background: #216fea !important; }
+      .ranking-grid { grid-template-columns: 1fr 1fr !important; margin: 0 24px !important; }
+    }
+  
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 10, 20, .72);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      width: min(100%, 520px);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(11,23,40,.98), rgba(14,28,48,.98));
+      box-shadow: 0 28px 60px rgba(0,0,0,.42);
+      padding: 22px;
+      color: var(--text);
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .45px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .modal-error {
+      margin-top: 10px;
+      color: #ffb0b0;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .45px;
+      min-height: 18px;
+    }
+
+    .lead-table {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 260px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .lead-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+    }
+
+    .lead-row-main {
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .45px;
+    }
+
+    .lead-row-sub {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    @media (max-width: 780px) {
+      .lead-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  
+/* LOGIN TOP */
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #07111e, #0d1c31);
+}
+.login-card {
+  width: 420px;
+  padding: 35px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+.login-title {
+  font-size: 26px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+.login-sub {
+  font-size: 12px;
+  color: #9db0d1;
+  margin-bottom: 20px;
+}
+.login-input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  margin-bottom: 12px;
+}
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: #216fea;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+.login-error {
+  color: red;
+  font-size: 12px;
+  margin-top: 10px;
+}
+.locked .app { display:none; }
+
+</style>
+</head>
+<body class="locked">
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-title">FRADE IMÓVEIS</div>
+    <div class="login-sub">ACESSO RESTRITO</div>
+    <input type="text" id="usernameInput" class="login-input" placeholder="Usuário">
+    <input type="password" id="passwordInput" class="login-input" placeholder="Senha">
+    <button class="login-btn" onclick="login()">ENTRAR</button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+</div>
+
+
+  <button class="tv-exit-btn" id="tvExitBtn" title="Sair do modo TV (ESC)">ESC • VOLTAR AO PAINEL</button>
+  <div class="app" id="appRoot">
+    <aside class="panel sidebar">
+      <div class="section">
+        <div class="title">
+          <div class="title-left">
+            <div class="logo-mark">F</div>
+            <div>
+              <h1 style="margin:0;">Frade | Fila + Presença</h1>
+              <div class="small" style="margin:4px 0 0 0; letter-spacing:.4px;">Painel premium de distribuição</div>
+            </div>
+          </div>
+          <span class="badge">TV + Controle</span>
+        </div>
+        <p class="subtitle">Controle quem está presente, quem está na fila do próximo lead, quantos leads cada corretor recebeu no escritório, quantos atendimentos foram feitos e acompanhe um ranking ao vivo.</p>
+        <p class="small" style="margin-top:8px;">Versão pronta para receber a logo oficial da Frade quando você me enviar o arquivo.</p>
+      </div>
+
+      <div class="section">
+        <h3>Adicionar corretor</h3>
+        <div class="actions" style="display:block; margin-top:12px;">
+          <input id="nameInput" class="input" type="text" placeholder="Digite o nome do corretor" />
+          <div class="actions">
+            <button class="btn btn-primary" id="addBtn">Adicionar / dar presença</button>
+            <button class="btn btn-secondary" id="addSampleBtn">Carregar equipe Frade</button>
+          </div>
+        </div>
+        <p class="small">Ao adicionar, o corretor entra como presente e fica apto para a fila.</p>
+      </div>
+
+      <div class="section">
+        <h3>Controles rápidos</h3>
+        <div class="actions">
+          <button class="btn btn-success" id="leadTakenBtn">Confirmar lead do atual</button>
+          <button class="btn btn-primary" id="serviceTakenBtn">Registrar atendimento</button>
+          <button class="btn btn-warning" id="skipBtn">Passar para o final</button>
+          <button class="btn btn-secondary" id="toggleTimerBtn">Pausar cronômetro</button>
+          <button class="btn btn-secondary" id="tvModeBtn">Modo TV</button>
+          <button class="btn btn-secondary" id="exportCsvBtn"><span style="display:inline-flex;align-items:center;gap:8px;">
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#21A366">
+  <path d="M19 3H10a1 1 0 0 0-1 1v3H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h4v3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM9 16H6V9h3v7zm9 5h-7v-3h7v3zm0-5h-7V4h7v12z"/>
+  <path d="M7.5 10.5l1.5 2 1.5-2h1.5l-2.25 3 2.25 3H10.5l-1.5-2-1.5 2H6l2.25-3L6 10.5z" fill="#fff"/>
+</svg>
+Planilha</span></button>
+          <button class="btn btn-secondary" id="printReportBtn">Imprimir relatório</button>
+          <button class="btn btn-danger" id="resetBtn">Resetar dia</button>
+        </div>
+        <p class="small">Lead e atendimento são contados separadamente. O lead move o corretor ao final da fila. O atendimento apenas soma a produtividade.</p>
+        <p class="tv-hint">No modo TV, você pode sair pelo botão flutuante no canto superior direito ou apertando ESC.</p>
+      </div>
+
+      <div class="section">
+        <h3>Configuração do tempo</h3>
+        <div class="grid-2" style="margin-top:12px;">
+          <div>
+            <label class="small" for="minutesSelect" style="display:block; margin-bottom:6px;">Minutos por vez</label>
+            <select id="minutesSelect" class="select">
+              <option value="1">1 minuto</option>
+              <option value="3">3 minutos</option>
+              <option value="5" selected>5 minutos</option>
+              <option value="10">10 minutos</option>
+            </select>
+          </div>
+          <div>
+            <label class="small" for="autoRotateSelect" style="display:block; margin-bottom:6px;">Rotação automática</label>
+            <select id="autoRotateSelect" class="select">
+              <option value="on" selected>Ligada</option>
+              <option value="off">Desligada</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Status geral</h3>
+        <div class="stats">
+          <div class="stat">
+            <div class="label">Presentes</div>
+            <div class="value" id="activeCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Na fila</div>
+            <div class="value" id="queueCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Leads do atual</div>
+            <div class="value" id="currentLeads">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Atend. do atual</div>
+            <div class="value" id="currentServices">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+        <h3>Gerenciar presença e fila</h3>
+        <div class="table-list" id="manageList" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="section">
+        <div class="footer-note">Dica: deixe esta página aberta no navegador do computador e coloque a TV em espelhamento. No modo TV, o painel de controle some e fica apenas a visualização principal.</div>
+      </div>
+    </aside>
+
+    <main class="panel display">
+      <div class="topbar">
+        <div class="brand">
+          <div class="kicker">Frade Imóveis • Distribuição Automática</div>
+          <h2>Fila do Próximo Lead + Presença do Escritório</h2>
+          <div class="small" style="margin:0;">Ordem inicial carregada com todos os corretores cadastrados</div>
+        </div>
+        <div class="clock">
+          <div class="time" id="clockTime">--:--:--</div>
+          <div class="date" id="clockDate">--</div>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div class="now-card">
+          <div>
+            <div class="eyebrow">Corretor da vez</div>
+            <div class="now-name" id="currentName">Nenhum corretor na fila</div>
+            <div class="now-sub" id="currentDescription">Adicione nomes no painel ao lado para iniciar a rotação automática de leads e a lista de presença.</div>
+          </div>
+          <div class="status-row">
+            <div class="pill" id="nextPersonPill">Próximo: --</div>
+            <div class="pill" id="autoStatusPill">Rotação: ligada</div>
+            <div class="pill" id="timerStatusPill">Cronômetro ativo</div>
+          </div>
+        </div>
+
+        <div class="timer-card">
+          <div>
+            <div class="eyebrow">Tempo restante</div>
+            <div class="timer-label">Limite da vez atual</div>
+            <div class="timer-value" id="timerValue">05:00</div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="timer-note" id="timerNote">Quando o tempo acabar, o corretor atual vai automaticamente para o final da fila.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+          <div class="frade-mark"><span class="logo-mark" style="width:26px; height:26px; border-radius:9px; font-size:12px; box-shadow:none;">F</span> Frade Imóveis • Painel Premium</div>
+          <div class="small" style="margin:0; text-transform:uppercase; letter-spacing:.5px;">Painel diário de presença, fila e produtividade do escritório</div>
+        </div>
+        <div class="summary-head">
+          <div class="queue-title">Resumo do dia</div>
+          <div class="badge" id="queueBadge">0 corretores</div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-box">
+            <div class="label">Presentes hoje</div>
+            <div class="value" id="presentTodayValue">0</div>
+          </div>
+          <div class="summary-box">
+            <div class="label">Leads no escritório</div>
+            <div class="value" id="totalLeadsValue">0</div>
+          </div>
+          <div class="summary-box">
+            <div class="label">Atendimentos feitos</div>
+            <div class="value" id="totalServicesValue">0</div>
+          </div>
+          <div class="summary-box">
+            <div class="label">Rodadas da fila</div>
+            <div class="value" id="roundCount">0</div>
+          </div>
+          <div class="summary-box">
+            <div class="label">Leads detalhados</div>
+            <div class="value" id="detailedLeadCount">0</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="ranking-grid">
+        <div class="ranking-card">
+          <div class="queue-head">
+            <div class="queue-title" style="font-size:20px;">Top 3 do dia</div>
+            <div class="badge" id="rankingBadge">Sem ranking</div>
+          </div>
+          <div class="top3-list" id="top3List"></div>
+        </div>
+
+        <div class="history-card">
+          <div class="queue-head">
+            <div class="queue-title" style="font-size:20px;">Histórico de ações</div>
+            <div class="badge" id="historyBadge">0 registros</div>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </section>
+
+      <section class="queue-card">
+        <div class="queue-head">
+          <div class="queue-title">Ordem atual da fila</div>
+        </div>
+        <div class="queue-list" id="queueList"></div>
+
+        <div style="height:18px"></div>
+
+        <div class="queue-head">
+          <div class="queue-title" style="font-size:20px;">Lista de presença e produção</div>
+        </div>
+        <div class="presence-list" id="presenceList"></div>
+
+        <div style="height:18px"></div>
+
+        <div class="queue-head">
+          <div class="queue-title" style="font-size:20px;">Leads detalhados do dia</div>
+        </div>
+        <div class="lead-table" id="leadTable"></div>
+      </section>
+    </main>
+  </div>
+
+  
+  <div class="modal-backdrop" id="leadModal">
+    <div class="modal-card">
+      <div class="modal-title">Detalhar lead</div>
+      <div class="modal-sub">Preencha os dados do lead para registrar no sistema e no relatório.</div>
+      <div class="modal-grid">
+        <input id="leadNameInput" class="input" type="text" placeholder="Nome do lead" />
+        <input id="leadContactInput" class="input" type="text" placeholder="Contato do lead (WhatsApp / telefone)" />
+      </div>
+      <div class="modal-error" id="leadModalError"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelLeadModalBtn" type="button">Cancelar</button>
+        <button class="btn btn-success" id="saveLeadModalBtn" type="button">Salvar lead</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'fila_leads_presenca_frade_premium_v1';
+
+    const state = {
+      queue: [],
+      currentIndex: 0,
+      secondsPerTurn: 300,
+      currentTurnStartedAt: null,
+      timerPaused: false,
+      pausedRemainingSeconds: null,
+      autoRotate: true,
+      roundsToday: 0,
+      tvMode: false,
+      lastAutoDate: null,
+      history: [],
+      leadLogs: [],
+      pendingLeadCorretorId: null,
+      seedVersion: 'frade-team-v2'
+    };
+
+    const els = {
+      appRoot: document.getElementById('appRoot'),
+      nameInput: document.getElementById('nameInput'),
+      addBtn: document.getElementById('addBtn'),
+      addSampleBtn: document.getElementById('addSampleBtn'),
+      leadTakenBtn: document.getElementById('leadTakenBtn'),
+      serviceTakenBtn: document.getElementById('serviceTakenBtn'),
+      exportCsvBtn: document.getElementById('exportCsvBtn'),
+      printReportBtn: document.getElementById('printReportBtn'),
+      skipBtn: document.getElementById('skipBtn'),
+      toggleTimerBtn: document.getElementById('toggleTimerBtn'),
+      tvModeBtn: document.getElementById('tvModeBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      minutesSelect: document.getElementById('minutesSelect'),
+      autoRotateSelect: document.getElementById('autoRotateSelect'),
+      activeCount: document.getElementById('activeCount'),
+      queueCount: document.getElementById('queueCount'),
+      currentLeads: document.getElementById('currentLeads'),
+      currentServices: document.getElementById('currentServices'),
+      roundCount: document.getElementById('roundCount'),
+      manageList: document.getElementById('manageList'),
+      clockTime: document.getElementById('clockTime'),
+      clockDate: document.getElementById('clockDate'),
+      currentName: document.getElementById('currentName'),
+      currentDescription: document.getElementById('currentDescription'),
+      nextPersonPill: document.getElementById('nextPersonPill'),
+      autoStatusPill: document.getElementById('autoStatusPill'),
+      timerStatusPill: document.getElementById('timerStatusPill'),
+      timerValue: document.getElementById('timerValue'),
+      progressFill: document.getElementById('progressFill'),
+      timerNote: document.getElementById('timerNote'),
+      queueBadge: document.getElementById('queueBadge'),
+      queueList: document.getElementById('queueList'),
+      presenceList: document.getElementById('presenceList'),
+      presentTodayValue: document.getElementById('presentTodayValue'),
+      totalLeadsValue: document.getElementById('totalLeadsValue'),
+      totalServicesValue: document.getElementById('totalServicesValue'),
+      top3List: document.getElementById('top3List'),
+      historyList: document.getElementById('historyList'),
+      rankingBadge: document.getElementById('rankingBadge'),
+      historyBadge: document.getElementById('historyBadge'),
+      detailedLeadCount: document.getElementById('detailedLeadCount'),
+      tvExitBtn: document.getElementById('tvExitBtn'),
+      leadTable: document.getElementById('leadTable'),
+      leadModal: document.getElementById('leadModal'),
+      leadNameInput: document.getElementById('leadNameInput'),
+      leadContactInput: document.getElementById('leadContactInput'),
+      leadModalError: document.getElementById('leadModalError'),
+      cancelLeadModalBtn: document.getElementById('cancelLeadModalBtn'),
+      saveLeadModalBtn: document.getElementById('saveLeadModalBtn')
+    };
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    }
+
+    function normalizeName(name) {
+      return name.trim().replace(/\s+/g, ' ');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function addHistory(message) {
+      const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      state.history.unshift({ id: uid(), time, message });
+      state.history = state.history.slice(0, 80);
+    }
+
+    function resetTurnStart() {
+      state.currentTurnStartedAt = Date.now();
+      state.pausedRemainingSeconds = null;
+    }
+
+    function resetDailyData(keepPeople = true) {
+      if (!keepPeople) {
+        state.queue = [];
+      } else {
+        state.queue.forEach(person => {
+          person.leads = 0;
+          person.services = 0;
+          person.present = false;
+          person.arrivedAt = null;
+          person.leftAt = null;
+          person.paused = true;
+        });
+      }
+      state.currentIndex = 0;
+      state.roundsToday = 0;
+      state.timerPaused = false;
+      state.pausedRemainingSeconds = null;
+      state.history = [];
+      state.leadLogs = [];
+      state.leadLogs = [];
+      resetTurnStart();
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        resetTurnStart();
+        return;
+      }
+      try {
+        Object.assign(state, JSON.parse(raw));
+      } catch (e) {
+        console.error('Erro ao carregar estado:', e);
+      }
+
+      if (!Array.isArray(state.queue)) state.queue = [];
+      if (!Array.isArray(state.history)) state.history = [];
+      if (!Array.isArray(state.leadLogs)) state.leadLogs = [];
+      if (!Array.isArray(state.leadLogs)) state.leadLogs = [];
+      if (!Array.isArray(state.leadLogs)) state.leadLogs = [];
+
+      state.queue = state.queue.map(person => ({
+        id: person.id || uid(),
+        name: person.name || 'Sem nome',
+        leads: Number(person.leads || 0),
+        services: Number(person.services || 0),
+        paused: Boolean(person.paused),
+        present: person.present !== undefined ? Boolean(person.present) : !Boolean(person.paused),
+        joinedAt: person.joinedAt || Date.now(),
+        arrivedAt: person.arrivedAt || null,
+        leftAt: person.leftAt || null
+      }));
+
+      // Recalcular total de leads de cada corretor a partir dos registros detalhados
+      state.queue.forEach(person => {
+        person.leads = (state.leadLogs || []).filter(log =>
+          (log.corretorId && log.corretorId === person.id) || (!log.corretorId && log.corretor === person.name)
+        ).length;
+      });
+
+      if (typeof state.currentIndex !== 'number') state.currentIndex = 0;
+      if (typeof state.secondsPerTurn !== 'number') state.secondsPerTurn = 300;
+      if (typeof state.autoRotate !== 'boolean') state.autoRotate = true;
+      if (typeof state.timerPaused !== 'boolean') state.timerPaused = false;
+      if (typeof state.tvMode !== 'boolean') state.tvMode = false;
+
+      if (!state.queue.length) {
+        state.currentIndex = 0;
+        resetTurnStart();
+      } else {
+        state.currentIndex = Math.min(state.currentIndex, state.queue.length - 1);
+        if (!state.currentTurnStartedAt && !state.timerPaused) resetTurnStart();
+      }
+    }
+
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function formatHour(ts) {
+      if (!ts) return '--';
+      return new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getCurrentPerson() {
+      if (!state.queue.length) return null;
+      return state.queue[state.currentIndex] || null;
+    }
+
+    function isEligible(person) {
+      return Boolean(person && person.present && !person.paused);
+    }
+
+    function getRemainingSeconds() {
+      if (!state.queue.length) return state.secondsPerTurn;
+      if (state.timerPaused && state.pausedRemainingSeconds != null) return state.pausedRemainingSeconds;
+      const elapsed = Math.floor((Date.now() - state.currentTurnStartedAt) / 1000);
+      return Math.max(0, state.secondsPerTurn - elapsed);
+    }
+
+    function getNextActiveIndex(startIndex) {
+      if (!state.queue.length) return -1;
+      for (let offset = 1; offset <= state.queue.length; offset++) {
+        const idx = (startIndex + offset + state.queue.length) % state.queue.length;
+        if (isEligible(state.queue[idx])) return idx;
+      }
+      return -1;
+    }
+
+    function ensureCurrentIsActive() {
+      if (!state.queue.length) return;
+      const activeExists = state.queue.some(isEligible);
+      if (!activeExists) return;
+      if (isEligible(state.queue[state.currentIndex])) return;
+      const idx = getNextActiveIndex(state.currentIndex - 1);
+      if (idx >= 0) {
+        state.currentIndex = idx;
+        resetTurnStart();
+      }
+    }
+
+    function pulseTitle() {
+      els.currentName.animate([
+        { transform: 'scale(1)', opacity: 1 },
+        { transform: 'scale(1.02)', opacity: .8 },
+        { transform: 'scale(1)', opacity: 1 }
+      ], { duration: 500, easing: 'ease-out' });
+    }
+
+    function findByName(name) {
+      const clean = normalizeName(name).toLowerCase();
+      return state.queue.find(person => person.name.toLowerCase() === clean);
+    }
+
+    function addOrPresentPerson(name) {
+      const clean = normalizeName(name);
+      if (!clean) return;
+      const existing = findByName(clean);
+      if (existing) {
+        existing.present = true;
+        existing.paused = false;
+        existing.arrivedAt = Date.now();
+        existing.leftAt = null;
+        addHistory(`${existing.name} marcou presença no escritório.`);
+      } else {
+        state.queue.push({
+          id: uid(),
+          name: clean,
+          leads: 0,
+          services: 0,
+          paused: false,
+          present: true,
+          joinedAt: Date.now(),
+          arrivedAt: Date.now(),
+          leftAt: null
+        });
+        addHistory(`${clean} entrou na lista de presença e na fila.`);
+      }
+
+      if (state.queue.length === 1) {
+        state.currentIndex = 0;
+        resetTurnStart();
+      }
+      ensureCurrentIsActive();
+      saveState();
+      render();
+    }
+
+    function removePerson(id) {
+      const idx = state.queue.findIndex(p => p.id === id);
+      if (idx === -1) return;
+      addHistory(`${state.queue[idx].name} foi removido do painel.`);
+      state.queue.splice(idx, 1);
+      if (state.currentIndex >= state.queue.length) state.currentIndex = 0;
+      if (idx < state.currentIndex) state.currentIndex -= 1;
+      if (state.currentIndex < 0) state.currentIndex = 0;
+      if (!state.queue.length) resetTurnStart();
+      ensureCurrentIsActive();
+      saveState();
+      render();
+    }
+
+    function togglePausePerson(id) {
+      const person = state.queue.find(p => p.id === id);
+      if (!person) return;
+      person.paused = !person.paused;
+      if (!person.paused) person.present = true;
+      if (!person.present) person.paused = true;
+      addHistory(`${person.name} ${person.paused ? 'foi pausado na fila' : 'voltou para a fila'}.`);
+      ensureCurrentIsActive();
+      saveState();
+      render();
+    }
+
+    function togglePresencePerson(id) {
+      const person = state.queue.find(p => p.id === id);
+      if (!person) return;
+      person.present = !person.present;
+      if (person.present) {
+        person.paused = false;
+        person.arrivedAt = Date.now();
+        person.leftAt = null;
+      } else {
+        person.paused = true;
+        person.leftAt = Date.now();
+      }
+      addHistory(`${person.name} ${person.present ? 'marcou presença' : 'foi marcado como ausente'}.`);
+      ensureCurrentIsActive();
+      saveState();
+      render();
+    }
+
+    function registerServiceCurrent() {
+      const current = getCurrentPerson();
+      if (!current || !isEligible(current)) return;
+      current.services += 1;
+      addHistory(`${current.name} registrou 1 atendimento.`);
+      saveState();
+      render();
+    }
+
+    function moveCurrentToEnd(countLead = false, automatic = false) {
+      if (!state.queue.length) return;
+      const current = getCurrentPerson();
+      if (!current) return;
+      const activeCount = state.queue.filter(isEligible).length;
+      if (!isEligible(current) && activeCount === 0) return;
+
+      if (countLead) {
+        current.leads += 1;
+        addHistory(`${current.name} recebeu 1 lead e foi para o final da fila.`);
+      } else {
+        addHistory(`${current.name} foi movido para o final da fila${automatic ? ' por tempo esgotado' : ''}.`);
+      }
+
+      const removed = state.queue.splice(state.currentIndex, 1)[0];
+      state.queue.push(removed);
+      const nextIdx = state.queue.findIndex(isEligible);
+      state.currentIndex = nextIdx >= 0 ? nextIdx : 0;
+      state.roundsToday += 1;
+      resetTurnStart();
+      saveState();
+      render();
+      if (automatic) pulseTitle();
+    }
+
+    function toggleTimerPause() {
+      if (!state.queue.length) return;
+      if (!state.timerPaused) {
+        state.pausedRemainingSeconds = getRemainingSeconds();
+        state.timerPaused = true;
+      } else {
+        const remaining = state.pausedRemainingSeconds ?? state.secondsPerTurn;
+        state.currentTurnStartedAt = Date.now() - (state.secondsPerTurn - remaining) * 1000;
+        state.pausedRemainingSeconds = null;
+        state.timerPaused = false;
+      }
+      saveState();
+      render();
+    }
+
+    function escapeXml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function exportStyledExcel() {
+      const today = new Date().toLocaleDateString('pt-BR');
+      const summaryRows = state.queue.map(person => [
+        today,
+        person.name,
+        person.present ? 'Presente' : 'Ausente',
+        isEligible(person) ? 'Sim' : 'Não',
+        person.leads,
+        person.services,
+        formatHour(person.arrivedAt),
+        formatHour(person.leftAt)
+      ]);
+
+      const leadRows = (state.leadLogs || []).map(log => [
+        today,
+        log.corretor || '',
+        log.leadNome || '',
+        log.leadContato || '',
+        log.dataHora || ''
+      ]);
+
+      const ss = [];
+      ss.push('<?xml version="1.0"?>');
+      ss.push('<?mso-application progid="Excel.Sheet"?>');
+      ss.push('<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"');
+      ss.push(' xmlns:o="urn:schemas-microsoft-com:office:office"');
+      ss.push(' xmlns:x="urn:schemas-microsoft-com:office:excel"');
+      ss.push(' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"');
+      ss.push(' xmlns:html="http://www.w3.org/TR/REC-html40">');
+
+      ss.push('<Styles>');
+      ss.push('<Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Borders/><Font ss:FontName="Calibri" ss:Size="11"/><Interior/><NumberFormat/><Protection/></Style>');
+      ss.push('<Style ss:ID="title"><Font ss:FontName="Calibri" ss:Size="14" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#216FEA" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>');
+      ss.push('<Style ss:ID="header"><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#3F95FF" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D9E6FF"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D9E6FF"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D9E6FF"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D9E6FF"/></Borders></Style>');
+      ss.push('<Style ss:ID="text"><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/></Borders></Style>');
+      ss.push('<Style ss:ID="textAlt"><Interior ss:Color="#F7FAFF" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/></Borders></Style>');
+      ss.push('<Style ss:ID="num"><Alignment ss:Horizontal="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E8EEF9"/></Borders></Style>');
+      ss.push('</Styles>');
+
+      // RESUMO
+      ss.push('<Worksheet ss:Name="Resumo do Dia"><Table>');
+      [90,140,90,70,60,90,70,70].forEach(w => ss.push(`<Column ss:Width="${w}"/>`));
+      ss.push('<Row ss:Height="24"><Cell ss:MergeAcross="7" ss:StyleID="title"><Data ss:Type="String">FRADE-PAINEL</Data></Cell></Row>');
+      ss.push('<Row>');
+      ['Data','Nome','Presença','Na fila','Leads','Atendimentos','Entrada','Saída'].forEach(h => ss.push(`<Cell ss:StyleID="header"><Data ss:Type="String">${escapeXml(h)}</Data></Cell>`));
+      ss.push('</Row>');
+      summaryRows.forEach((row, idx) => {
+        const style = idx % 2 === 0 ? 'text' : 'textAlt';
+        ss.push('<Row>');
+        row.forEach((val, cidx) => {
+          const cellStyle = [4,5].includes(cidx) ? 'num' : style;
+          const cellType = [4,5].includes(cidx) ? 'Number' : 'String';
+          ss.push(`<Cell ss:StyleID="${cellStyle}"><Data ss:Type="${cellType}">${escapeXml(val)}</Data></Cell>`);
+        });
+        ss.push('</Row>');
+      });
+      ss.push('</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane><ActivePane>2</ActivePane></WorksheetOptions></Worksheet>');
+
+      // LEADS
+      ss.push('<Worksheet ss:Name="Leads Detalhados"><Table>');
+      [90,140,160,130,130].forEach(w => ss.push(`<Column ss:Width="${w}"/>`));
+      ss.push('<Row ss:Height="24"><Cell ss:MergeAcross="4" ss:StyleID="title"><Data ss:Type="String">FRADE-PAINEL</Data></Cell></Row>');
+      ss.push('<Row>');
+      ['Data','Corretor','Lead Nome','Lead Contato','Data Hora'].forEach(h => ss.push(`<Cell ss:StyleID="header"><Data ss:Type="String">${escapeXml(h)}</Data></Cell>`));
+      ss.push('</Row>');
+      if (leadRows.length === 0) {
+        ss.push('<Row><Cell ss:MergeAcross="4" ss:StyleID="text"><Data ss:Type="String">Nenhum lead detalhado registrado.</Data></Cell></Row>');
+      } else {
+        leadRows.forEach((row, idx) => {
+          const style = idx % 2 === 0 ? 'text' : 'textAlt';
+          ss.push('<Row>');
+          row.forEach(val => ss.push(`<Cell ss:StyleID="${style}"><Data ss:Type="String">${escapeXml(val)}</Data></Cell>`));
+          ss.push('</Row>');
+        });
+      }
+      ss.push('</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane><ActivePane>2</ActivePane></WorksheetOptions></Worksheet>');
+
+      ss.push('</Workbook>');
+
+      const xml = ss.join('');
+      const blob = new Blob(['\ufeff' + xml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `FRADE-PAINEL-${today.replace(/\//g, '-')}.xls`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      addHistory('Planilha Excel bonita exportada.');
+      saveState();
+      renderHistory();
+    }
+
+    function exportDailyCsv() {
+      const today = new Date().toLocaleDateString('pt-BR');
+
+      const rows = [[
+        'Data',
+        'Nome',
+        'Presença',
+        'Na fila',
+        'Leads',
+        'Atendimentos',
+        'Entrada',
+        'Saída',
+        'Lead Nome',
+        'Lead Contato'
+      ]];
+
+      state.queue.forEach(person => {
+        const personLeadLogs = (state.leadLogs || []).filter(log =>
+          (log.corretorId && log.corretorId === person.id) || (!log.corretorId && log.corretor === person.name)
+        );
+
+        if (personLeadLogs.length > 0) {
+          personLeadLogs.forEach(log => {
+            rows.push([
+              today,
+              person.name,
+              person.present ? 'Presente' : 'Ausente',
+              isEligible(person) ? 'Sim' : 'Não',
+              person.leads,
+              person.services,
+              formatHour(person.arrivedAt),
+              formatHour(person.leftAt),
+              log.leadNome || '',
+              log.leadContato || ''
+            ]);
+          });
+        } else {
+          rows.push([
+            today,
+            person.name,
+            person.present ? 'Presente' : 'Ausente',
+            isEligible(person) ? 'Sim' : 'Não',
+            person.leads,
+            person.services,
+            formatHour(person.arrivedAt),
+            formatHour(person.leftAt),
+            '',
+            ''
+          ]);
+        }
+      });
+
+      const csv = rows
+        .map(row => row.map(value => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(';'))
+        .join('\r\n');
+
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `frade-relatorio-${today.replace(/\//g, '-')}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      addHistory('CSV diário exportado com leads detalhados.');
+      saveState();
+      render();
+    }
+
+    function printDailyReport() {
+      addHistory('Relatório diário enviado para impressão.');
+      saveState();
+      renderHistory();
+      window.print();
+    }
+
+
+    function openLeadModal() {
+      const current = getCurrentPerson();
+      if (!current || !isEligible(current)) return;
+      state.pendingLeadCorretorId = current.id;
+      els.leadNameInput.value = '';
+      els.leadContactInput.value = '';
+      els.leadModalError.textContent = '';
+      els.leadModal.classList.add('open');
+      setTimeout(() => els.leadNameInput.focus(), 50);
+    }
+
+    function closeLeadModal() {
+      els.leadModal.classList.remove('open');
+      state.pendingLeadCorretorId = null;
+      els.leadModalError.textContent = '';
+    }
+
+    function saveLeadFromModal() {
+      const current = state.queue.find(p => p.id === state.pendingLeadCorretorId);
+      const leadNome = (els.leadNameInput.value || '').trim();
+      const leadContato = (els.leadContactInput.value || '').trim();
+
+      if (!current || !isEligible(current)) {
+        els.leadModalError.textContent = 'Não foi possível identificar o corretor da vez.';
+        return;
+      }
+
+      if (!leadNome) {
+        els.leadModalError.textContent = 'Informe o nome do lead.';
+        els.leadNameInput.focus();
+        return;
+      }
+
+      if (!Array.isArray(state.leadLogs)) state.leadLogs = [];
+
+      state.leadLogs.push({
+        id: uid(),
+        corretorId: current.id,
+        corretor: current.name,
+        leadNome: leadNome,
+        leadContato: leadContato,
+        dataHora: new Date().toLocaleString('pt-BR')
+      });
+
+      current.leads += 1;
+      addHistory(`${current.name} recebeu 1 lead: ${leadNome}.`);
+
+      const idx = state.queue.findIndex(p => p.id === current.id);
+      if (idx >= 0) {
+        const removed = state.queue.splice(idx, 1)[0];
+        state.queue.push(removed);
+      }
+
+      state.currentIndex = state.queue.findIndex(isEligible);
+      if (state.currentIndex < 0) state.currentIndex = 0;
+
+      state.roundsToday += 1;
+      resetTurnStart();
+      saveState();
+      closeLeadModal();
+      render();
+    }
+
+    function renderLeadTable() {
+      const list = els.leadTable;
+      list.innerHTML = '';
+      const logs = Array.isArray(state.leadLogs) ? state.leadLogs : [];
+
+      if (els.detailedLeadCount) {
+        els.detailedLeadCount.textContent = logs.length;
+      }
+
+      if (!logs.length) {
+        list.innerHTML = '<div class="empty">Nenhum lead detalhado registrado ainda.</div>';
+        return;
+      }
+
+      logs.slice().reverse().forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'lead-row';
+        row.innerHTML = `
+          <div>
+            <div class="lead-row-main">${escapeHtml(item.leadNome || '--')}</div>
+            <div class="lead-row-sub">${escapeHtml(item.dataHora || '--')}</div>
+          </div>
+          <div>
+            <div class="lead-row-main">${escapeHtml(item.corretor || '--')}</div>
+            <div class="lead-row-sub">Corretor</div>
+          </div>
+          <div>
+            <div class="lead-row-main">${escapeHtml(item.leadContato || '--')}</div>
+            <div class="lead-row-sub">Contato</div>
+          </div>
+          <div>
+            <button class="mini-btn red" data-id="${item.id}">Remover</button>
+          </div>
+        `;
+        row.querySelector('button').addEventListener('click', () => {
+          state.leadLogs = logs.filter(x => x.id !== item.id);
+
+          // recalcular leads por corretor após remoção
+          state.queue.forEach(person => {
+            person.leads = state.leadLogs.filter(log =>
+              (log.corretorId && log.corretorId === person.id) || (!log.corretorId && log.corretor === person.name)
+            ).length;
+          });
+
+          saveState();
+          render();
+        });
+        list.appendChild(row);
+      });
+    }
+
+    function renderClock() {
+      const now = new Date();
+      els.clockTime.textContent = now.toLocaleTimeString('pt-BR');
+      els.clockDate.textContent = now.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function renderManageList() {
+      const list = els.manageList;
+      list.innerHTML = '';
+      if (!state.queue.length) {
+        list.innerHTML = '<div class="empty">Nenhum corretor cadastrado ainda.</div>';
+        return;
+      }
+
+      state.queue.forEach((person, index) => {
+        const row = document.createElement('div');
+        row.className = 'mini-row' + (!isEligible(person) ? ' paused' : '');
+        row.innerHTML = `
+          <div>
+            <div class="mini-name">${index === state.currentIndex ? '▶ ' : ''}${escapeHtml(person.name)}</div>
+            <div class="small" style="margin-top:4px;">Presença: <strong>${person.present ? 'Presente' : 'Ausente'}</strong> | Leads: <strong>${person.leads}</strong> | Atend.: <strong>${person.services}</strong></div>
+          </div>
+          <span class="mini-badge">${person.present ? 'No escritório' : 'Ausente'}</span>
+          <button class="mini-btn blue" data-action="presence">${person.present ? 'Dar saída' : 'Dar presença'}</button>
+          <button class="mini-btn gray" data-action="pause">${person.paused ? 'Retomar fila' : 'Pausar fila'}</button>
+          <button class="mini-btn red" data-action="remove">Remover</button>
+        `;
+        row.querySelector('[data-action="presence"]').addEventListener('click', () => togglePresencePerson(person.id));
+        row.querySelector('[data-action="pause"]').addEventListener('click', () => togglePausePerson(person.id));
+        row.querySelector('[data-action="remove"]').addEventListener('click', () => removePerson(person.id));
+        list.appendChild(row);
+      });
+    }
+
+    function renderQueueList() {
+      const list = els.queueList;
+      list.innerHTML = '';
+      if (!state.queue.length) {
+        list.innerHTML = '<div class="queue-empty">A fila está vazia. Adicione os corretores no painel de controle.</div>';
+        return;
+      }
+
+      const nextActive = getNextActiveIndex(state.currentIndex);
+      state.queue.forEach((person, index) => {
+        const item = document.createElement('div');
+        item.className = 'queue-item' + (index === state.currentIndex ? ' current' : '') + (!isEligible(person) ? ' paused' : '');
+        let rightText = 'Na fila';
+        if (!person.present) rightText = 'Ausente';
+        else if (person.paused) rightText = 'Pausado';
+        else if (index === state.currentIndex) rightText = 'Da vez';
+        else if (index === nextActive) rightText = 'Próximo';
+
+        item.innerHTML = `
+          <div class="position">${index + 1}</div>
+          <div>
+            <div class="person-name">${escapeHtml(person.name)}</div>
+            <div class="person-meta">Leads: ${person.leads} | Atendimentos: ${person.services} | Entrada: ${formatHour(person.arrivedAt)}</div>
+          </div>
+          <div class="right-tag">${rightText}</div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function renderPresenceList() {
+      const list = els.presenceList;
+      list.innerHTML = '';
+      if (!state.queue.length) {
+        list.innerHTML = '<div class="empty">Sem dados de presença.</div>';
+        return;
+      }
+
+      state.queue.forEach(person => {
+        const row = document.createElement('div');
+        row.className = 'presence-row';
+        row.innerHTML = `
+          <div class="presence-name">${escapeHtml(person.name)}</div>
+          <div class="presence-col">${person.present ? 'Presente' : 'Ausente'}</div>
+          <div class="presence-col">Leads: <strong>${person.leads}</strong></div>
+          <div class="presence-col">Atend.: <strong>${person.services}</strong></div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function renderRanking() {
+      const list = els.top3List;
+      list.innerHTML = '';
+      const ranked = [...state.queue]
+        .map(person => ({ ...person, score: (person.leads * 3) + person.services }))
+        .filter(person => person.score > 0)
+        .sort((a, b) => b.score - a.score || b.leads - a.leads || b.services - a.services)
+        .slice(0, 3);
+
+      els.rankingBadge.textContent = ranked.length ? 'Atualizado ao vivo' : 'Sem ranking';
+
+      if (!ranked.length) {
+        list.innerHTML = '<div class="empty">Ainda não há produção suficiente para formar o ranking do dia.</div>';
+        return;
+      }
+
+      const medals = ['🥇', '🥈', '🥉'];
+      ranked.forEach((person, index) => {
+        const item = document.createElement('div');
+        item.className = 'top3-item';
+        item.innerHTML = `
+          <div class="medal">${medals[index]}</div>
+          <div>
+            <div class="person-name" style="font-size:18px;">${escapeHtml(person.name)}</div>
+            <div class="person-meta">Leads: ${person.leads} | Atendimentos: ${person.services}</div>
+          </div>
+          <div class="right-tag">Score ${person.score}</div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function renderHistory() {
+      const list = els.historyList;
+      list.innerHTML = '';
+      els.historyBadge.textContent = `${state.history.length} ${state.history.length === 1 ? 'registro' : 'registros'}`;
+      if (!state.history.length) {
+        list.innerHTML = '<div class="empty">As movimentações do dia aparecerão aqui.</div>';
+        return;
+      }
+
+      state.history.slice(0, 20).forEach(entry => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `<strong>${entry.time}</strong> — ${escapeHtml(entry.message)}`;
+        list.appendChild(item);
+      });
+    }
+
+    function renderMain() {
+      const current = getCurrentPerson();
+      const nextIdx = getNextActiveIndex(state.currentIndex);
+      const nextPerson = nextIdx >= 0 ? state.queue[nextIdx] : null;
+      const activeCount = state.queue.filter(person => person.present).length;
+      const eligibleCount = state.queue.filter(isEligible).length;
+      const remaining = getRemainingSeconds();
+      const progress = state.secondsPerTurn ? ((state.secondsPerTurn - remaining) / state.secondsPerTurn) * 100 : 0;
+      const totalLeads = state.queue.reduce((acc, p) => acc + p.leads, 0);
+      const totalServices = state.queue.reduce((acc, p) => acc + p.services, 0);
+
+      if (!current || eligibleCount === 0) {
+        els.currentName.textContent = state.queue.length && activeCount === 0 ? 'Sem presentes' : 'Nenhum corretor na fila';
+        els.currentDescription.textContent = state.queue.length && activeCount === 0
+          ? 'Marque pelo menos um corretor como presente para reativar a fila.'
+          : 'Adicione nomes no painel ao lado para iniciar a rotação automática de leads e a lista de presença.';
+        els.nextPersonPill.textContent = 'Próximo: --';
+        els.currentLeads.textContent = '0';
+        els.currentServices.textContent = '0';
+      } else {
+        els.currentName.textContent = current.name;
+        els.currentDescription.textContent = 'Este corretor está com prioridade para receber o próximo lead dentro do tempo configurado.';
+        els.nextPersonPill.textContent = 'Próximo: ' + (nextPerson ? nextPerson.name : '--');
+        els.currentLeads.textContent = current.leads;
+        els.currentServices.textContent = current.services;
+      }
+
+      els.autoStatusPill.textContent = 'Rotação: ' + (state.autoRotate ? 'ligada' : 'desligada');
+      els.timerStatusPill.textContent = state.timerPaused ? 'Cronômetro pausado' : 'Cronômetro ativo';
+      els.timerValue.textContent = formatTime(remaining);
+      els.progressFill.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+      els.timerNote.textContent = state.autoRotate
+        ? 'Quando o tempo acabar, o corretor atual vai automaticamente para o final da fila.'
+        : 'A rotação automática está desligada. A troca será apenas manual.';
+
+      els.activeCount.textContent = activeCount;
+      els.queueCount.textContent = eligibleCount;
+      els.currentLeads.textContent = current && isEligible(current) ? current.leads : 0;
+      els.currentServices.textContent = current && isEligible(current) ? current.services : 0;
+      els.presentTodayValue.textContent = activeCount;
+      els.totalLeadsValue.textContent = totalLeads;
+      els.totalServicesValue.textContent = totalServices;
+      els.roundCount.textContent = state.roundsToday;
+      if (els.detailedLeadCount) els.detailedLeadCount.textContent = (state.leadLogs || []).length;
+      els.queueBadge.textContent = `${state.queue.length} ${state.queue.length === 1 ? 'corretor' : 'corretores'}`;
+
+      els.toggleTimerBtn.textContent = state.timerPaused ? 'Retomar cronômetro' : 'Pausar cronômetro';
+      els.tvModeBtn.textContent = state.tvMode ? 'Sair do modo TV' : 'Modo TV';
+      els.minutesSelect.value = String(Math.round(state.secondsPerTurn / 60));
+      els.autoRotateSelect.value = state.autoRotate ? 'on' : 'off';
+
+      renderQueueList();
+      renderPresenceList();
+      renderManageList();
+      renderRanking();
+      renderHistory();
+    }
+
+
+    function exitTvMode() {
+      if (!state.tvMode) return;
+      state.tvMode = false;
+      saveState();
+      render();
+    }
+
+    function renderTvMode() {
+      document.body.classList.toggle('tv-mode', state.tvMode);
+    }
+
+    function render() {
+      ensureCurrentIsActive();
+      renderClock();
+      renderMain();
+      renderTvMode();
+    }
+
+    function handleAutoRotate() {
+      if (!state.queue.length) return;
+      if (!state.queue.some(isEligible)) return;
+      if (!state.autoRotate || state.timerPaused) return;
+      if (getRemainingSeconds() <= 0) moveCurrentToEnd(false, true);
+    }
+
+    function bindEvents() {
+      els.addBtn.addEventListener('click', () => {
+        addOrPresentPerson(els.nameInput.value);
+        els.nameInput.value = '';
+        els.nameInput.focus();
+      });
+
+      els.nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          addOrPresentPerson(els.nameInput.value);
+          els.nameInput.value = '';
+        }
+      });
+
+      els.addSampleBtn.addEventListener('click', () => {
+        seedTeam(true);
+        render();
+      });
+
+      els.leadTakenBtn.addEventListener('click', openLeadModal);
+      els.serviceTakenBtn.addEventListener('click', registerServiceCurrent);
+      els.exportCsvBtn.addEventListener('click', exportStyledExcel);
+      els.printReportBtn.addEventListener('click', printDailyReport);
+      els.skipBtn.addEventListener('click', () => moveCurrentToEnd(false, false));
+      els.toggleTimerBtn.addEventListener('click', toggleTimerPause);
+
+      els.tvModeBtn.addEventListener('click', () => {
+        state.tvMode = !state.tvMode;
+        saveState();
+        render();
+      });
+
+      els.tvExitBtn.addEventListener('click', () => {
+        exitTvMode();
+      });
+
+      els.cancelLeadModalBtn.addEventListener('click', closeLeadModal);
+      els.saveLeadModalBtn.addEventListener('click', saveLeadFromModal);
+      els.leadModal.addEventListener('click', (e) => {
+        if (e.target === els.leadModal) closeLeadModal();
+      });
+      els.leadNameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          els.leadContactInput.focus();
+        }
+      });
+      els.leadContactInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveLeadFromModal();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          exitTvMode();
+        }
+      });
+
+      els.resetBtn.addEventListener('click', () => {
+        const ok = confirm('Tem certeza que deseja resetar os dados do dia? Isso zera presença, leads e atendimentos.');
+        if (!ok) return;
+        resetDailyData(true);
+        addHistory('O dia foi resetado manualmente.');
+        saveState();
+        render();
+      });
+
+      els.minutesSelect.addEventListener('change', () => {
+        state.secondsPerTurn = Number(els.minutesSelect.value) * 60;
+        resetTurnStart();
+        saveState();
+        render();
+      });
+
+      els.autoRotateSelect.addEventListener('change', () => {
+        state.autoRotate = els.autoRotateSelect.value === 'on';
+        saveState();
+        render();
+      });
+    }
+
+    function initMidnightResetRound() {
+      const today = new Date().toLocaleDateString('pt-BR');
+      if (state.lastAutoDate !== today) {
+        resetDailyData(true);
+        state.lastAutoDate = today;
+        saveState();
+      }
+    }
+
+
+    const TEAM_PRELOAD = ['Anna', 'Arthur', 'Beatriz', 'Berg', 'Eduardo', 'Ewerton', 'Jefferson', 'Jordelly', 'Luciana', 'Luciano', 'Luiz', 'Matheus', 'Patricia', 'Priscilla', 'Renata', 'Rodrigo', 'Vanessa', 'Fernanda M.', 'Juliana', 'John', 'Marco', 'Anderson', 'Ronaldo', 'Fernanda O.'];
+
+    function buildPerson(name) {
+      return {
+        id: uid(),
+        name,
+        leads: 0,
+        services: 0,
+        paused: false,
+        present: true,
+        joinedAt: Date.now(),
+        arrivedAt: Date.now(),
+        leftAt: null
+      };
+    }
+
+    function seedTeam(force = false) {
+      const shouldSeed = force || !Array.isArray(state.queue) || !state.queue.length || state.seedVersion !== 'frade-team-v2';
+      if (!shouldSeed) return;
+      state.queue = TEAM_PRELOAD.map(buildPerson);
+      state.currentIndex = 0;
+      state.roundsToday = 0;
+      state.timerPaused = false;
+      state.pausedRemainingSeconds = null;
+      state.history = [];
+      state.leadLogs = [];
+      state.seedVersion = 'frade-team-v2';
+      resetTurnStart();
+      addHistory('Equipe padrão da Frade carregada com todos os corretores.');
+      saveState();
+    }
+
+
+    function init() {
+
+      loadState();
+      seedTeam(false);
+      initMidnightResetRound();
+      bindEvents();
+      render();
+      setInterval(() => {
+        initMidnightResetRound();
+        renderClock();
+        handleAutoRotate();
+        renderMain();
+      }, 1000);
+    }
+
+    init();
+  </script>
+
+<script>
+const usuario = "frade";
+const senha = "fradeadmin";
+
+function login(){
+  const userVal = (document.getElementById("usernameInput").value || "").trim();
+  const passVal = (document.getElementById("passwordInput").value || "").trim();
+
+  if(userVal === usuario && passVal === senha){
+    document.body.classList.remove("locked");
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("loginError").innerText = "";
+  } else {
+    document.getElementById("loginError").innerText = "Usuário ou senha incorretos";
+  }
+}
+
+document.addEventListener("keydown", function(e){
+  if(document.getElementById("loginScreen") && document.getElementById("loginScreen").style.display !== "none"){
+    if(e.key === "Enter"){
+      login();
+    }
+  }
+});
+</script>
+
+</body>
+</html>
