@@ -1012,7 +1012,7 @@ Planilha</span></button>
       </div>
 
       <div class="section">
-        <div class="footer-note">Dica: deixe esta página aberta no navegador do computador e coloque a TV em espelhamento. No modo TV, o painel de controle some e fica apenas a visualização principal.</div>
+        <div class="footer-note">Dica: deixe esta página aberta no navegador do computador e coloque a TV em espelhamento. No modo TV, o painel de controle some e fica apenas a visualização principal. Agora os dados também sincronizam em tempo real pela internet.</div>
       </div>
     </aside>
 
@@ -1149,8 +1149,60 @@ Planilha</span></button>
     </div>
   </div>
 
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGOntXZmBaG_n7_ten60RAglEA83AxD_Q",
+      authDomain: "frade-painel.firebaseapp.com",
+      databaseURL: "https://frade-painel-default-rtdb.firebaseio.com",
+      projectId: "frade-painel",
+      storageBucket: "frade-painel.firebasestorage.app",
+      messagingSenderId: "678417238984",
+      appId: "1:678417238984:web:8a06d0e0655b365f4c8efd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const stateRef = ref(db, "fradePainel/state");
+
+    function sanitizeState(state) {
+      return JSON.parse(JSON.stringify({
+        queue: Array.isArray(state.queue) ? state.queue : [],
+        currentIndex: Number(state.currentIndex || 0),
+        secondsPerTurn: Number(state.secondsPerTurn || 300),
+        currentTurnStartedAt: state.currentTurnStartedAt || null,
+        timerPaused: Boolean(state.timerPaused),
+        pausedRemainingSeconds: state.pausedRemainingSeconds ?? null,
+        autoRotate: state.autoRotate !== false,
+        roundsToday: Number(state.roundsToday || 0),
+        tvMode: Boolean(state.tvMode),
+        lastAutoDate: state.lastAutoDate || null,
+        history: Array.isArray(state.history) ? state.history : [],
+        leadLogs: Array.isArray(state.leadLogs) ? state.leadLogs : [],
+        pendingLeadCorretorId: state.pendingLeadCorretorId || null,
+        seedVersion: state.seedVersion || "frade-team-v2"
+      }));
+    }
+
+    window.firebaseBridge = {
+      save(state) {
+        return set(stateRef, sanitizeState(state));
+      },
+      subscribe(callback) {
+        return onValue(stateRef, (snapshot) => {
+          callback(snapshot.val());
+        });
+      }
+    };
+  </script>
+
   <script>
     const STORAGE_KEY = 'fila_leads_presenca_frade_premium_v1';
+    let applyingRemoteState = false;
+    let subscribedRemoteState = false;
 
     const state = {
       queue: [],
@@ -1240,6 +1292,11 @@ Planilha</span></button>
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!applyingRemoteState && window.firebaseBridge) {
+        window.firebaseBridge.save(state).catch((err) => {
+          console.error('Erro ao salvar no Firebase:', err);
+        });
+      }
     }
 
     function addHistory(message) {
@@ -1276,22 +1333,10 @@ Planilha</span></button>
       resetTurnStart();
     }
 
-    function loadState() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        resetTurnStart();
-        return;
-      }
-      try {
-        Object.assign(state, JSON.parse(raw));
-      } catch (e) {
-        console.error('Erro ao carregar estado:', e);
-      }
 
+    function normalizeLoadedState() {
       if (!Array.isArray(state.queue)) state.queue = [];
       if (!Array.isArray(state.history)) state.history = [];
-      if (!Array.isArray(state.leadLogs)) state.leadLogs = [];
-      if (!Array.isArray(state.leadLogs)) state.leadLogs = [];
       if (!Array.isArray(state.leadLogs)) state.leadLogs = [];
 
       state.queue = state.queue.map(person => ({
@@ -1306,7 +1351,6 @@ Planilha</span></button>
         leftAt: person.leftAt || null
       }));
 
-      // Recalcular total de leads de cada corretor a partir dos registros detalhados
       state.queue.forEach(person => {
         person.leads = (state.leadLogs || []).filter(log =>
           (log.corretorId && log.corretorId === person.id) || (!log.corretorId && log.corretor === person.name)
@@ -1325,6 +1369,33 @@ Planilha</span></button>
       } else {
         state.currentIndex = Math.min(state.currentIndex, state.queue.length - 1);
         if (!state.currentTurnStartedAt && !state.timerPaused) resetTurnStart();
+      }
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          Object.assign(state, JSON.parse(raw));
+        } catch (e) {
+          console.error('Erro ao carregar estado local:', e);
+        }
+      } else {
+        resetTurnStart();
+      }
+
+      normalizeLoadedState();
+
+      if (window.firebaseBridge && !subscribedRemoteState) {
+        subscribedRemoteState = true;
+        window.firebaseBridge.subscribe((remoteState) => {
+          if (!remoteState) return;
+          applyingRemoteState = true;
+          Object.assign(state, remoteState);
+          normalizeLoadedState();
+          applyingRemoteState = false;
+          render();
+        });
       }
     }
 
@@ -2162,6 +2233,7 @@ Planilha</span></button>
       loadState();
       seedTeam(false);
       initMidnightResetRound();
+      saveState();
       bindEvents();
       render();
       setInterval(() => {
