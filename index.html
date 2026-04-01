@@ -1197,12 +1197,35 @@ Planilha</span></button>
         });
       }
     };
+
+    window.dispatchEvent(new CustomEvent('firebase-bridge-ready'));
   </script>
 
   <script>
     const STORAGE_KEY = 'fila_leads_presenca_frade_premium_v1';
     let applyingRemoteState = false;
     let subscribedRemoteState = false;
+
+    function setupFirebaseSync() {
+      if (!window.firebaseBridge || subscribedRemoteState) return;
+      subscribedRemoteState = true;
+      window.firebaseBridge.subscribe((remoteState) => {
+        if (!remoteState) {
+          // Primeira carga: sobe o estado local atual para o Firebase
+          window.firebaseBridge.save(state).catch((err) => {
+            console.error('Erro ao inicializar estado no Firebase:', err);
+          });
+          return;
+        }
+        applyingRemoteState = true;
+        Object.assign(state, remoteState);
+        normalizeLoadedState();
+        applyingRemoteState = false;
+        render();
+      });
+    }
+
+    window.addEventListener('firebase-bridge-ready', setupFirebaseSync);
 
     const state = {
       queue: [],
@@ -1385,18 +1408,7 @@ Planilha</span></button>
       }
 
       normalizeLoadedState();
-
-      if (window.firebaseBridge && !subscribedRemoteState) {
-        subscribedRemoteState = true;
-        window.firebaseBridge.subscribe((remoteState) => {
-          if (!remoteState) return;
-          applyingRemoteState = true;
-          Object.assign(state, remoteState);
-          normalizeLoadedState();
-          applyingRemoteState = false;
-          render();
-        });
-      }
+      setupFirebaseSync();
     }
 
     function formatTime(totalSeconds) {
